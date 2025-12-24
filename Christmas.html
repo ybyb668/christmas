@@ -1,0 +1,2301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Christmas Wish | 聖誕許願</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital@0;1&family=Noto+Serif+TC:wght@500&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        :root {
+            --gold: #FFD700;
+            --gold-light: #FFFACD;
+            --glass: rgba(10, 10, 10, 0.85);
+            --glass-light: rgba(40, 40, 40, 0.6);
+            --border: rgba(255, 215, 0, 0.3);
+            --accent: #D42426; /* Christmas Red */
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #050505;
+            font-family: 'Cinzel', 'Noto Serif TC', serif;
+            color: var(--gold);
+            user-select: none;
+            -webkit-user-select: none;
+            transition: background 1s ease;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* UI Overlay Layer */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2rem;
+            box-sizing: border-box;
+            transition: opacity 0.5s ease;
+        }
+
+        /* User Profile (Top Left) */
+        #user-profile {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            pointer-events: auto;
+            cursor: pointer;
+            z-index: 25;
+            background: rgba(0,0,0,0.3);
+            padding: 6px 16px 6px 6px;
+            border-radius: 30px;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+        #user-profile:hover {
+            background: rgba(0,0,0,0.6);
+            border-color: var(--gold);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+        #user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), #b8860b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            font-size: 1.1rem;
+            border: 1px solid var(--gold-light);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+        #user-name { font-size: 0.85rem; letter-spacing: 1px; color: #eee; font-weight: 700; }
+
+        /* Header */
+        .header {
+            text-align: center;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+            pointer-events: auto;
+            margin-top: 1rem;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin: 0;
+            font-weight: 700;
+            background: linear-gradient(to bottom, #fff, var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 5px;
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.5));
+        }
+
+        p.subtitle {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.8);
+            margin-top: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        /* Controls Container (Optimized Bottom Left) */
+        .controls {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.2rem;
+            pointer-events: auto;
+            z-index: 20;
+        }
+
+        .controls-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        /* Add Memory Button */
+        button#btn-add {
+            background: rgba(15, 15, 15, 0.85);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 12px 28px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 4px;
+            outline: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: fit-content;
+        }
+
+        button#btn-add:hover {
+            background: var(--gold);
+            color: #000;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .guide-text {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
+            margin-left: 2px;
+            font-style: italic;
+        }
+
+        /* Toggle Group */
+        .btn-group {
+            display: flex;
+            background: rgba(15, 15, 15, 0.85);
+            border-radius: 30px;
+            padding: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-group button {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            padding: 8px 20px;
+            font-size: 0.75rem;
+            border-radius: 25px;
+            margin: 0;
+            box-shadow: none;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-group button.active {
+            background: var(--gold);
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Zoom Buttons */
+        .zoom-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        .zoom-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(20, 20, 20, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.2rem;
+        }
+        .zoom-btn:hover {
+            background: var(--gold);
+            color: #000;
+            border-color: var(--gold);
+        }
+
+        /* Loading Screen */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--gold);
+            border-right: 2px solid var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px var(--gold);
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #status-text {
+            font-size: 0.9rem;
+            color: var(--gold);
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        #file-input { display: none; }
+
+        #webcam-preview {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            width: 160px;
+            height: 120px;
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            transform: scaleX(-1);
+            z-index: 5;
+            object-fit: cover;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+        
+        #webcam-preview.visible { opacity: 0.9; }
+
+        /* Focus Action Buttons */
+        #focus-actions {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 25;
+            display: flex;
+            gap: 15px;
+        }
+
+        #focus-actions.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #exit-focus-btn {
+            background: rgba(0,0,0,0.85);
+            border: 1px solid var(--gold);
+            padding: 10px 30px;
+            font-size: 1rem;
+            color: var(--gold);
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+        }
+        #exit-focus-btn:hover { background: var(--gold); color: black; box-shadow: 0 0 40px rgba(212, 175, 55, 0.6); }
+
+        #delete-photo-btn {
+            background: rgba(50, 0, 0, 0.85);
+            border: 1px solid #ff4d4d;
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #ff4d4d;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        #delete-photo-btn:hover { background: #ff4d4d; color: white; box-shadow: 0 0 20px rgba(255, 77, 77, 0.4); }
+
+        /* Settings Button */
+        #settings-btn {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--gold);
+            z-index: 20;
+            pointer-events: auto;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(5px);
+        }
+        #settings-btn:hover { 
+            transform: rotate(90deg) scale(1.1); 
+            background: var(--gold);
+            color: #000;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+        #settings-btn span { font-size: 24px; }
+
+        /* Fullscreen Button */
+        #fullscreen-btn {
+            position: absolute;
+            top: 2rem;
+            right: 5.5rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--gold);
+            z-index: 20;
+            pointer-events: auto;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(5px);
+        }
+        #fullscreen-btn:hover { 
+            transform: scale(1.1); 
+            background: var(--gold);
+            color: #000;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Settings Panel */
+        #settings-panel {
+            position: absolute;
+            top: 6rem;
+            right: 2rem;
+            width: 320px;
+            max-height: 75vh;
+            overflow-y: auto;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 12px;
+            z-index: 19;
+            backdrop-filter: blur(20px);
+            display: none;
+            pointer-events: auto;
+            color: #fff;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+        
+        #settings-panel::-webkit-scrollbar { width: 6px; }
+        #settings-panel::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+        .accordion-item {
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 5px;
+        }
+        .accordion-header {
+            padding: 10px 5px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--gold);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            transition: color 0.2s;
+        }
+        .accordion-header:hover { color: #fff; text-shadow: 0 0 8px var(--gold); }
+        .accordion-content {
+            display: none;
+            padding: 10px 5px;
+            animation: slideDown 0.3s ease;
+        }
+        .accordion-content.active { display: block; }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .setting-row { margin-bottom: 1.2rem; }
+        .setting-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.75rem; letter-spacing: 1px; color: #ccc; }
+        
+        input[type=range] { width: 100%; -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: var(--gold); cursor: pointer; margin-top: -5px; box-shadow: 0 0 10px rgba(255,215,0,0.8); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; cursor: pointer; background: rgba(255,255,255,0.2); border-radius: 2px; }
+
+        select, input[type=text] {
+            width: 100%;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 4px;
+            outline: none;
+            font-family: 'Cinzel', 'Noto Serif TC', serif;
+            font-size: 0.8rem;
+            transition: border-color 0.3s;
+        }
+        select:focus, input[type=text]:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+
+        /* Custom Checkbox */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 18px;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #444;
+            transition: .4s;
+            border-radius: 20px;
+            border: 1px solid #666;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--gold); border-color: var(--gold); }
+        input:checked + .slider:before { transform: translateX(16px); background-color: #000; }
+
+
+        /* User Center Modal */
+        #user-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .modal-content {
+            background: #050505;
+            border: 1px solid var(--gold);
+            width: 450px;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 0 80px rgba(212, 175, 55, 0.2);
+            text-align: center;
+            position: relative;
+        }
+        .close-modal { position: absolute; top: 15px; right: 20px; color: #fff; cursor: pointer; font-size: 1.5rem; transition: color 0.2s;}
+        .close-modal:hover { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+        
+        .save-slot {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #333;
+            padding: 12px 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 6px;
+        }
+        .save-slot:hover { border-color: var(--gold); background: rgba(212, 175, 55, 0.08); box-shadow: 0 0 15px rgba(212, 175, 55, 0.1); }
+        .save-info { text-align: left; }
+        .save-name { font-weight:bold; color:var(--gold); font-size: 0.9rem; }
+        .save-date { color: #666; font-size: 0.7rem; margin-top: 2px; }
+        
+        .modal-btn {
+            width: 100%; 
+            margin-bottom: 20px; 
+            padding: 12px; 
+            background: linear-gradient(45deg, var(--gold), #b8860b); 
+            color: #000; 
+            border: none; 
+            font-weight: bold; 
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            transition: transform 0.2s;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+        .modal-btn:hover { transform: scale(1.02); box-shadow: 0 0 40px rgba(212, 175, 55, 0.5); }
+
+        #save-name-input {
+            width: 80%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #444;
+            color: white;
+            border-radius: 4px;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+        }
+        #save-name-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
+
+        /* Signature Logo */
+        .signature-logo {
+            font-family: 'Dancing Script', cursive;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1.0rem;
+            margin-top: 30px;
+            letter-spacing: 1px;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <div style="letter-spacing: 3px; font-weight: bold; color: #FFF;">INITIALIZING CHRISTMAS</div>
+        <div id="status-text">Decorating Tree...</div>
+    </div>
+
+    <!-- User Center Modal -->
+    <div id="user-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="toggleUserModal()">×</span>
+            <h2 style="color: var(--gold); margin-top:0; letter-spacing: 2px; text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);">Memory Archive</h2>
+            <div style="margin-bottom: 25px; font-size: 0.8rem; color: #888; font-family: sans-serif;">
+                Enter a name to save your current scene.
+            </div>
+            
+            <input type="text" id="save-name-input" placeholder="e.g. My Christmas Dream">
+            <button class="modal-btn" onclick="saveScene()">+ Save Current Scene</button>
+            
+            <div style="border-bottom: 1px solid #333; margin: 15px 0;"></div>
+            <div style="text-align:left; font-size:0.8rem; color:#aaa; margin-bottom:10px;">SAVED SCENES</div>
+            
+            <div id="saves-list" style="max-height: 250px; overflow-y: auto;"></div>
+
+            <div class="signature-logo">MYYF's puppy made</div>
+        </div>
+    </div>
+
+    <div id="ui-layer">
+        
+        <div id="user-profile" onclick="toggleUserModal()">
+            <div id="user-avatar">U</div>
+            <div id="user-name">User Center</div>
+        </div>
+
+        <div class="header">
+            <h1>Christmas Wish</h1>
+            <p class="subtitle">A minimalist luxury dream</p>
+        </div>
+        
+        <!-- Fullscreen Button -->
+        <div id="fullscreen-btn" onclick="toggleFullscreen()">
+            <span class="material-icons">fullscreen</span>
+        </div>
+
+        <div id="settings-btn" onclick="toggleSettings()">
+            <span class="material-icons">settings</span>
+        </div>
+        
+        <div id="settings-panel">
+            
+            <!-- Lighting -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Lighting</span> <span class="material-icons">expand_more</span>
+                </div>
+                <div class="accordion-content active">
+                    <div class="setting-row">
+                        <div class="setting-label"><span>Glow Intensity</span><span id="val-emissive">1.7</span></div>
+                        <input type="range" id="input-emissive" min="0" max="5" step="0.1" value="1.7">
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-label"><span>Bloom Strength</span><span id="val-strength">1.4</span></div>
+                        <input type="range" id="input-strength" min="0" max="3" step="0.1" value="1.4">
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-label"><span>Bloom Threshold</span><span id="val-threshold">0.95</span></div>
+                        <input type="range" id="input-threshold" min="0" max="1" step="0.05" value="0.95">
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-label"><span>Exposure</span><span id="val-exposure">1.2</span></div>
+                        <input type="range" id="input-exposure" min="0.1" max="3.0" step="0.1" value="1.2">
+                    </div>
+                     <div class="setting-row">
+                        <div class="setting-label"><span>Reflection</span><span id="val-reflection">2.5</span></div>
+                        <input type="range" id="input-reflection" min="0" max="5.0" step="0.1" value="2.5">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Particles -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Particles</span> <span class="material-icons">expand_more</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="setting-row">
+                        <div class="setting-label"><span>Rotation Speed</span><span id="val-speed">0.005</span></div>
+                        <input type="range" id="input-speed" min="0" max="0.01" step="0.001" value="0.005">
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-label"><span>Particle Size</span><span id="val-size">1.0</span></div>
+                        <input type="range" id="input-size" min="0.5" max="2.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="setting-row">
+                        <div class="setting-label"><span>Particle Count (%)</span><span id="val-count">100%</span></div>
+                        <input type="range" id="input-count" min="10" max="100" step="10" value="100">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Effects -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Effects</span> <span class="material-icons">expand_more</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="setting-row">
+                        <div class="setting-label"><span>Environment</span></div>
+                        <select id="select-weather">
+                            <option value="none">None</option>
+                            <option value="snow" selected>Snow</option>
+                            <option value="hail">Hail</option>
+                            <option value="rain">Rain</option>
+                            <option value="gold_rain">Golden Rain</option>
+                            <option value="frost">Flying Frost</option>
+                            <option value="sunny">Sunny</option>
+                            <option value="cabin">Snowy Cabin</option>
+                        </select>
+                    </div>
+                    <div class="setting-row" id="weather-amount-row">
+                        <div class="setting-label"><span>Intensity</span><span id="val-weather">2000</span></div>
+                        <input type="range" id="input-weather-amount" min="0" max="20000" step="100" value="2000">
+                    </div>
+                    
+                    <div class="setting-row">
+                        <div class="setting-label"><span>Music</span></div>
+                        <select id="select-music">
+                            <option value="none">None (Silent)</option>
+                            <option value="jingle">Jingle Bells (Demo)</option>
+                            <option value="silent">Silent Night (Demo)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gestures -->
+            <div class="accordion-item">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Gestures</span> <span class="material-icons">expand_more</span>
+                </div>
+                <div class="accordion-content">
+                    
+                    <div class="setting-row">
+                        <div class="setting-label"><span>Text Mode Message</span></div>
+                        <input type="text" id="input-text-msg" value="Merry Christmas" maxlength="20">
+                    </div>
+                     <div class="setting-row" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color:#ccc; font-size:0.75rem;">Hand Distance Zoom</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="check-gesture-zoom" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Scatter -->
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <span>Scatter Mode</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="check-gesture-scatter" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <select id="select-gesture-scatter" class="gesture-select">
+                            <option value="Open_Palm" selected>Open Palm</option>
+                            <option value="Closed_Fist">Fist</option>
+                            <option value="Victory">Victory (V)</option>
+                            <option value="Thumb_Up">Thumbs Up</option>
+                            <option value="Pointing_Up">Point Up</option>
+                            <option value="OK">OK</option>
+                            <option value="Pinch">Pinch</option>
+                        </select>
+                    </div>
+
+                    <!-- Tree -->
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <span>Tree Mode</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="check-gesture-tree" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <select id="select-gesture-tree" class="gesture-select">
+                            <option value="Open_Palm">Open Palm</option>
+                            <option value="Closed_Fist" selected>Fist</option>
+                            <option value="Victory">Victory (V)</option>
+                            <option value="Thumb_Up">Thumbs Up</option>
+                            <option value="Pointing_Up">Point Up</option>
+                            <option value="OK">OK</option>
+                            <option value="Pinch">Pinch</option>
+                        </select>
+                    </div>
+
+                    <!-- Focus -->
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <span>Focus Photo</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="check-gesture-focus" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <select id="select-gesture-focus" class="gesture-select">
+                            <option value="Open_Palm">Open Palm</option>
+                            <option value="Closed_Fist">Fist</option>
+                            <option value="Victory" selected>Victory (V)</option>
+                            <option value="Thumb_Up">Thumbs Up</option>
+                            <option value="Pointing_Up">Point Up</option>
+                            <option value="OK">OK</option>
+                            <option value="Pinch">Pinch</option>
+                        </select>
+                    </div>
+
+                    <!-- Ascend -->
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <span>Ascend Mode</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="check-gesture-ascend" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <select id="select-gesture-ascend" class="gesture-select">
+                            <option value="Open_Palm">Open Palm</option>
+                            <option value="Closed_Fist">Fist</option>
+                            <option value="Victory">Victory (V)</option>
+                            <option value="Thumb_Up">Thumbs Up</option>
+                            <option value="Pointing_Up" selected>Point Up</option>
+                            <option value="OK">OK</option>
+                            <option value="Pinch">Pinch</option>
+                        </select>
+                    </div>
+
+                    <!-- Text Mode -->
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <span>Text Mode</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="check-gesture-text" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <select id="select-gesture-text" class="gesture-select">
+                            <option value="Open_Palm">Open Palm</option>
+                            <option value="Closed_Fist">Fist</option>
+                            <option value="Victory">Victory (V)</option>
+                            <option value="Thumb_Up">Thumbs Up</option>
+                            <option value="Pointing_Up">Point Up</option>
+                            <option value="OK" selected>OK</option>
+                            <option value="Pinch">Pinch</option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div id="focus-actions">
+            <button id="exit-focus-btn">Close Memory</button>
+            <button id="delete-photo-btn"><span class="material-icons">delete</span> Delete</button>
+        </div>
+
+        <div class="controls">
+            <div class="controls-group">
+                <button id="btn-add" onclick="document.getElementById('file-input').click()">
+                    <span class="material-icons" style="font-size: 1.2rem;">add_photo_alternate</span> Add Memory
+                </button>
+                <div class="guide-text">Upload photos to hang on tree</div>
+            </div>
+
+            <div class="btn-group">
+                <button id="btn-mouse" class="active">Mouse</button>
+                <button id="btn-hand">Hand AI</button>
+            </div>
+            
+            <div class="zoom-group">
+                <button class="zoom-btn" onclick="zoomCamera(-5)">+</button>
+                <button class="zoom-btn" onclick="zoomCamera(5)">-</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Inputs/Elements -->
+    <input type="file" id="file-input" multiple accept="image/*">
+    <video id="webcam" style="display:none;" autoplay playsinline></video>
+    <canvas id="webcam-preview"></canvas>
+    
+    <audio id="bg-music" loop></audio>
+
+    <div id="canvas-container"></div>
+
+    <!-- Import Maps & Scripts -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+                "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/+esm"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'; 
+        import TWEEN from 'three/addons/libs/tween.module.js';
+        import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
+
+        // --- Configuration & State ---
+        const CONFIG = {
+            counts: {
+                gold: 1500,    
+                foliage: 2500, 
+                ornaments: 500, 
+                sprites: 150   
+            },
+            treeHeight: 22, 
+            treeRadius: 7, 
+            bloom: { threshold: 0.95, strength: 1.4, radius: 0.8 },
+            camDist: 35,
+            particleGlobalScale: 1.0,
+            glowIntensity: 1.7,
+            exposure: 1.2,
+            reflection: 2.5,
+            textMessage: "Merry Christmas",
+            weather: {
+                type: 'snow', 
+                count: 2000,
+                speed: 1.0
+            },
+            gestures: {
+                zoomEnabled: true, // Global toggle for hand distance zoom
+                scatter: { gesture: 'Open_Palm', enabled: true },
+                tree: { gesture: 'Closed_Fist', enabled: true },
+                focus: { gesture: 'Victory', enabled: true },
+                ascend: { gesture: 'Pointing_Up', enabled: true },
+                text: { gesture: 'OK', enabled: true }
+            }
+        };
+
+        const STATE = {
+            mode: 'TREE',
+            input: 'MOUSE',
+            rotationSpeed: 0.005,
+            autoRotate: true,
+            focusedPhoto: null,
+            handPos: { x: 0, y: 0 },
+            textPoints: [],
+            lastPinchDist: null,
+            lastHandX: null,
+            swipeCooldown: 0,
+            lastHandScale: null
+        };
+
+        // --- Globals ---
+        let scene, camera, renderer, composer, controls;
+        let meshGroups = []; 
+        let spriteGroup = new THREE.Group();
+        let weatherSystem;
+        let particleData = []; 
+        let photoGroup = new THREE.Group();
+        let photos = [];
+        let handLandmarker = null;
+        let lastVideoTime = -1;
+        let clock = new THREE.Clock();
+        let dummy = new THREE.Object3D();
+        let cabinTexture;
+        let pmremGenerator; 
+
+        const MUSIC_SOURCES = {
+            'none': '',
+            'jingle': 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Jingle_Bells_-_Kevin_MacLeod.ogg',
+            'silent': 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Silent_Night_-_Kevin_MacLeod.ogg' 
+        };
+
+        // --- Initialization ---
+        
+        async function init() {
+            particleData = [];
+            meshGroups = [];
+            
+            updateStatus('Initializing Scene...');
+            initScene();
+            initLights(); 
+            initWeather(); 
+            initParticles();
+            initSprites();
+            initPostProcessing();
+            initInputHandlers();
+            initSettingsUI();
+            initUserSystem();
+            regenerateTextTargets(); 
+            
+            updateGlow(CONFIG.glowIntensity);
+            // Apply initial reflection/exposure
+            updateReflection(CONFIG.reflection);
+            renderer.toneMappingExposure = CONFIG.exposure;
+
+            updateStatus('Starting Engine...');
+            animate();
+            
+            updateStatus('Loading Hand AI...');
+            try {
+                await initMediaPipe();
+            } catch (e) {
+                console.warn("MediaPipe failed:", e);
+                document.getElementById('btn-hand').style.display = 'none';
+            }
+
+            setTimeout(() => {
+                document.getElementById('loader').style.opacity = 0;
+                setTimeout(() => document.getElementById('loader').remove(), 800);
+            }, 1000);
+        }
+
+        function updateStatus(text) {
+            const el = document.getElementById('status-text');
+            if(el) el.innerText = text;
+        }
+        
+        function updateGlow(val) {
+            meshGroups.forEach(mesh => {
+                if(mesh.material && mesh.userData.baseEmissive !== undefined) {
+                    mesh.material.emissiveIntensity = val * (mesh.userData.baseEmissive || 1);
+                }
+            });
+        }
+        
+        function updateReflection(val) {
+             meshGroups.forEach(mesh => {
+                if(mesh.material && mesh.material.envMapIntensity !== undefined) {
+                    mesh.material.envMapIntensity = val;
+                }
+            });
+        }
+
+        function getCabinTexture() {
+            if(cabinTexture) return cabinTexture;
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024; 
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            
+            const grad = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height, 0, 
+                canvas.width / 2, canvas.height, canvas.height
+            );
+            grad.addColorStop(0, '#5e3a18'); 
+            grad.addColorStop(0.4, '#1a1a2e');
+            grad.addColorStop(1, '#000000');
+            
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            cabinTexture = new THREE.CanvasTexture(canvas);
+            cabinTexture.colorSpace = THREE.SRGBColorSpace;
+            return cabinTexture;
+        }
+
+        function initScene() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x020202); 
+            scene.fog = new THREE.FogExp2(0x020202, 0.02);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, CONFIG.camDist);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance", alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); 
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = CONFIG.exposure; 
+            container.appendChild(renderer.domElement);
+            
+            pmremGenerator = new THREE.PMREMGenerator(renderer);
+            pmremGenerator.compileEquirectangularShader();
+            const roomEnvironment = new RoomEnvironment();
+            scene.environment = pmremGenerator.fromScene(roomEnvironment).texture;
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.enablePan = false;
+            controls.minDistance = 10;
+            controls.maxDistance = 150;
+            controls.target.set(0, 0, 0);
+        }
+
+        function initLights() {
+            const ambient = new THREE.AmbientLight(0xffffff, 0.2); 
+            scene.add(ambient);
+
+            const topLight = new THREE.PointLight(0xFFD700, 3, 100);
+            topLight.position.set(0, CONFIG.treeHeight + 10, 0);
+            scene.add(topLight);
+
+            const rimLight = new THREE.SpotLight(0x4455ff, 5, 50, 0.5, 0.5, 1);
+            rimLight.position.set(-20, 10, -20);
+            rimLight.lookAt(0,0,0);
+            scene.add(rimLight);
+            
+            const bottomLight = new THREE.PointLight(0xFFAA00, 2.0, 60);
+            bottomLight.position.set(0, -20, 10);
+            scene.add(bottomLight);
+        }
+
+        function initWeather() {
+            const maxParticles = 20000;
+            const geo = new THREE.BufferGeometry();
+            const pos = new Float32Array(maxParticles * 3);
+            const vels = new Float32Array(maxParticles); 
+
+            for(let i=0; i<maxParticles; i++) {
+                pos[i*3] = (Math.random() - 0.5) * 120;
+                pos[i*3+1] = (Math.random() - 0.5) * 120;
+                pos[i*3+2] = (Math.random() - 0.5) * 120;
+                vels[i] = (Math.random() * 0.1) + 0.05;
+            }
+            
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            geo.userData = { velocities: vels };
+
+            const mat = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 0.25,
+                transparent: true,
+                opacity: 0.5,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            weatherSystem = new THREE.Points(geo, mat);
+            weatherSystem.geometry.setDrawRange(0, CONFIG.weather.count);
+            scene.add(weatherSystem);
+        }
+
+        function updateWeatherAnimation() {
+            if(!weatherSystem || CONFIG.weather.type === 'none' || CONFIG.weather.type === 'sunny') {
+                if(weatherSystem) weatherSystem.visible = false;
+                return;
+            }
+            weatherSystem.visible = true;
+
+            const positions = weatherSystem.geometry.attributes.position.array;
+            const vels = weatherSystem.geometry.userData.velocities;
+            let speedMult = 1.0;
+            let windX = 0;
+            
+            if(CONFIG.weather.type === 'hail') speedMult = 3.0;
+            if(CONFIG.weather.type === 'rain' || CONFIG.weather.type === 'gold_rain') { speedMult = 5.0; windX = 0.05; }
+            if(CONFIG.weather.type === 'frost') { speedMult = 0.5; windX = 2.0; } 
+
+            for(let i=0; i < CONFIG.weather.count; i++) {
+                const idx = i * 3;
+                
+                if(CONFIG.weather.type === 'frost') {
+                    positions[idx] += windX;
+                    positions[idx + 1] -= vels[i] * 0.2;
+                    if(positions[idx] > 60) positions[idx] = -60;
+                    if(positions[idx + 1] < -60) positions[idx + 1] = 60;
+                } else {
+                    positions[idx + 1] -= vels[i] * speedMult;
+                    positions[idx] += windX; 
+                    if(positions[idx + 1] < -60) {
+                        positions[idx + 1] = 60;
+                        positions[idx] = (Math.random() - 0.5) * 120;
+                    }
+                }
+            }
+            weatherSystem.geometry.attributes.position.needsUpdate = true;
+            if(CONFIG.weather.type === 'snow') weatherSystem.rotation.y += 0.0005;
+        }
+
+        function updateWeatherSettings() {
+            if(!weatherSystem) return;
+            weatherSystem.geometry.setDrawRange(0, CONFIG.weather.count);
+            
+            const mat = weatherSystem.material;
+            const type = CONFIG.weather.type;
+            const body = document.body;
+
+            body.style.background = '#000';
+            scene.background = new THREE.Color(0x020202);
+            scene.fog.color.setHex(0x020202);
+
+            if(type === 'rain') {
+                mat.color.setHex(0xaaddff);
+                mat.size = 0.15;
+                mat.opacity = 0.4;
+            } else if (type === 'hail') {
+                mat.color.setHex(0xffffff);
+                mat.size = 0.3;
+                mat.opacity = 0.6;
+            } else if (type === 'gold_rain') {
+                mat.color.setHex(0xFFD700);
+                mat.size = 0.2;
+                mat.opacity = 0.8;
+            } else if (type === 'frost') {
+                mat.color.setHex(0xccffff);
+                mat.size = 0.15;
+                mat.opacity = 0.3;
+            } else if (type === 'sunny') {
+                body.style.background = 'linear-gradient(to bottom, #87CEEB, #E0F7FA)';
+                scene.background = new THREE.Color(0x87CEEB);
+                scene.fog.color.setHex(0x87CEEB);
+            } else if (type === 'cabin') {
+                // Use Texture for Cabin background to ensure visibility with Bloom/WebGL
+                scene.background = getCabinTexture();
+                scene.fog.color.setHex(0x0a0a1a); 
+                // Mat for snow in cabin mode
+                mat.color.setHex(0xffffff);
+                mat.size = 0.25;
+                mat.opacity = 0.5;
+            } else {
+                mat.color.setHex(0xffffff);
+                mat.size = 0.25;
+                mat.opacity = 0.5;
+            }
+        }
+
+        function regenerateTextTargets() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const W = 512;
+            const H = 256;
+            canvas.width = W;
+            canvas.height = H;
+            
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, W, H);
+            
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            const text = CONFIG.textMessage;
+            ctx.font = 'bold 60px "Cinzel", "Noto Serif TC", sans-serif';
+            ctx.fillText(text, W/2, H/2);
+            
+            const imageData = ctx.getImageData(0, 0, W, H).data;
+            const points = [];
+            
+            const step = 2; 
+            for(let y=0; y<H; y+=step) {
+                for(let x=0; x<W; x+=step) {
+                    const i = (y*W + x) * 4;
+                    if(imageData[i] > 128) { 
+                        points.push(new THREE.Vector3(
+                            (x - W/2) * 0.15, 
+                            -(y - H/2) * 0.15, 
+                            0
+                        ));
+                    }
+                }
+            }
+            
+            STATE.textPoints = points;
+        }
+
+        function initPostProcessing() {
+            const renderScene = new RenderPass(scene, camera);
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                1.5, 0.4, 0.85
+            );
+            bloomPass.threshold = CONFIG.bloom.threshold;
+            bloomPass.strength = CONFIG.bloom.strength;
+            bloomPass.radius = CONFIG.bloom.radius;
+
+            composer = new EffectComposer(renderer);
+            composer.addPass(renderScene);
+            composer.addPass(bloomPass);
+        }
+
+        function createEmojiTexture(emoji) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.font = '90px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText(emoji, 64, 64);
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.colorSpace = THREE.SRGBColorSpace;
+            return tex;
+        }
+
+        function getTreePosition() {
+            const rVal = Math.random();
+            const h = 1 - Math.sqrt(rVal); 
+            const rBase = (1 - h) * CONFIG.treeRadius; 
+            const theta = h * 50 + Math.random() * Math.PI * 2;
+            const r = rBase * (0.9 + Math.random() * 0.2); 
+            const x = r * Math.cos(theta);
+            const y = h * CONFIG.treeHeight - CONFIG.treeHeight / 2;
+            const z = r * Math.sin(theta);
+            return new THREE.Vector3(x, y, z);
+        }
+
+        function getScatterPosition() {
+            const scatterR = 10 + Math.random() * 10; 
+            const scatterTheta = Math.random() * Math.PI * 2;
+            const scatterPhi = Math.acos(2 * Math.random() - 1);
+            return new THREE.Vector3(
+                scatterR * Math.sin(scatterPhi) * Math.cos(scatterTheta),
+                scatterR * Math.sin(scatterPhi) * Math.sin(scatterTheta),
+                scatterR * Math.cos(scatterPhi)
+            );
+        }
+
+        function initParticles() {
+            // 1. Foliage: Matte Green
+            const geoFoliage = new THREE.TetrahedronGeometry(0.2, 0); 
+            const matFoliage = new THREE.MeshStandardMaterial({
+                color: 0x0f3d24, // Matte Green
+                emissive: 0x0f3d24, 
+                emissiveIntensity: 0.2, 
+                roughness: 0.8,
+                metalness: 0.1
+            });
+            createInstancedGroup(geoFoliage, matFoliage, CONFIG.counts.foliage, 'foliage');
+
+            // 2. Gold: Metallic Gold (High Shine)
+            const geoGold = new THREE.SphereGeometry(0.1, 16, 16); 
+            // MeshPhysicalMaterial for Advanced PBR
+            const matGold = new THREE.MeshPhysicalMaterial({
+                color: 0xFFD700,
+                emissive: 0xFFD700,
+                emissiveIntensity: 1.5,
+                metalness: 1.0,
+                roughness: 0.2,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1,
+                envMapIntensity: 2.5
+            });
+            createInstancedGroup(geoGold, matGold, CONFIG.counts.gold, 'gold');
+
+            // 3. Ornaments: Christmas Red Box (Satin)
+            const geoRedBox = new THREE.BoxGeometry(0.25, 0.25, 0.25);
+            const matRedBox = new THREE.MeshPhysicalMaterial({
+                color: 0xbb0a1e,
+                emissive: 0x550000,
+                emissiveIntensity: 0.5,
+                roughness: 0.3,
+                metalness: 0.4,
+                clearcoat: 0.5
+            });
+            createInstancedGroup(geoRedBox, matRedBox, Math.floor(CONFIG.counts.ornaments * 0.4), 'gift');
+
+            // 4. Candy Cane: Cylinder (Red)
+            const geoCandy = new THREE.CylinderGeometry(0.04, 0.04, 0.4, 6);
+            const matCandy = new THREE.MeshStandardMaterial({
+                color: 0xFFFFFF, // Base white
+                emissive: 0x222222,
+                roughness: 0.4,
+                metalness: 0.1
+            });
+            // We use instance coloring to make some red
+            createInstancedGroup(geoCandy, matCandy, Math.floor(CONFIG.counts.ornaments * 0.3), 'candy');
+
+            // 5. Santa Hat: Cone (Red)
+            const geoHat = new THREE.ConeGeometry(0.15, 0.4, 8);
+            const matHat = new THREE.MeshStandardMaterial({
+                color: 0xbb0a1e,
+                emissive: 0x330000,
+                roughness: 0.9, // Fabric
+                metalness: 0.1
+            });
+            createInstancedGroup(geoHat, matHat, Math.floor(CONFIG.counts.ornaments * 0.3), 'hat');
+
+            scene.add(photoGroup);
+        }
+
+        function createInstancedGroup(geo, mat, count, type) {
+            const mesh = new THREE.InstancedMesh(geo, mat, count);
+            mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+            scene.add(mesh);
+            meshGroups.push(mesh);
+            mesh.userData.baseEmissive = mat.emissiveIntensity;
+            mesh.userData.initialCount = count;
+
+            const colorRed = new THREE.Color(0xbb0a1e);
+            const colorWhite = new THREE.Color(0xFFFFFF); 
+
+            for (let i = 0; i < count; i++) {
+                const targetPos = getTreePosition();
+                const scatterPos = getScatterPosition();
+                let baseScale = 1.0;
+                let rotOffset = new THREE.Euler(Math.random()*Math.PI, Math.random()*Math.PI, 0);
+
+                if (type === 'foliage') {
+                    baseScale = 0.6 + Math.random() * 0.6;
+                    targetPos.multiplyScalar(0.95);
+                } else if (type === 'gift') {
+                    baseScale = 0.8 + Math.random() * 0.4;
+                } else if (type === 'candy') {
+                    rotOffset.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+                    // Randomly color red or white for candy feel
+                    if (Math.random() > 0.5) mesh.setColorAt(i, colorRed);
+                    else mesh.setColorAt(i, colorWhite);
+                } else if (type === 'hat') {
+                    baseScale = 0.8;
+                    rotOffset.set(0, Math.random()*Math.PI*2, 0); // Upright-ish
+                }
+
+                dummy.position.copy(targetPos);
+                dummy.scale.setScalar(baseScale);
+                dummy.rotation.copy(rotOffset);
+                dummy.updateMatrix();
+                mesh.setMatrixAt(i, dummy.matrix);
+
+                particleData.push({
+                    mesh: mesh,
+                    index: i,
+                    type: type,
+                    currentPos: targetPos.clone(),
+                    targetPos: targetPos,
+                    scatterPos: scatterPos,
+                    ascendPos: new THREE.Vector3(0, 0, 0),
+                    textPos: new THREE.Vector3(0, 0, 0), 
+                    baseScale: baseScale,
+                    rotationOffset: rotOffset,
+                    speed: 0.02 + Math.random() * 0.04
+                });
+            }
+        }
+
+        function initSprites() {
+            const emojis = ['🎅', '🦌', '❄️', '🍭', '⭐'];
+            const count = CONFIG.counts.sprites;
+            const textures = emojis.map(e => createEmojiTexture(e));
+
+            for (let i = 0; i < count; i++) {
+                const tex = textures[Math.floor(Math.random() * textures.length)];
+                const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.95, depthWrite: false });
+                const sprite = new THREE.Sprite(mat);
+                const targetPos = getTreePosition();
+                targetPos.multiplyScalar(1.15);
+                const scatterPos = getScatterPosition();
+                sprite.position.copy(targetPos);
+                const scale = 0.8 + Math.random() * 0.5;
+                sprite.scale.set(scale, scale, 1);
+                spriteGroup.add(sprite);
+                
+                particleData.push({
+                    isSprite: true,
+                    object: sprite,
+                    currentPos: targetPos.clone(),
+                    targetPos: targetPos,
+                    scatterPos: scatterPos,
+                    ascendPos: new THREE.Vector3(0, 0, 0), 
+                    textPos: new THREE.Vector3(0, 0, 0),
+                    baseScale: scale,
+                    speed: 0.02 + Math.random() * 0.03
+                });
+            }
+            scene.add(spriteGroup);
+        }
+
+        function addPhoto(blobUrl, savedPos = null, savedRot = null) {
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.load(blobUrl, (tex) => {
+                tex.colorSpace = THREE.SRGBColorSpace;
+                
+                const aspect = tex.image.width / tex.image.height;
+                const height = 2.5; 
+                const width = height * aspect;
+
+                const geo = new THREE.PlaneGeometry(width, height);
+                const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
+                const mesh = new THREE.Mesh(geo, mat);
+
+                const frameGeo = new THREE.BoxGeometry(width + 0.15, height + 0.15, 0.08);
+                const frameMat = new THREE.MeshStandardMaterial({ 
+                    color: 0xFFD700, roughness: 0.1, metalness: 1.0, emissive: 0x332200 
+                });
+                const frame = new THREE.Mesh(frameGeo, frameMat);
+                frame.position.z = -0.05;
+                mesh.add(frame);
+
+                let x, y, z;
+                
+                if (savedPos) {
+                    mesh.position.copy(savedPos);
+                    mesh.rotation.copy(savedRot);
+                    
+                    mesh.userData = {
+                        originalPos: savedPos.clone(),
+                        originalRot: savedRot.clone(),
+                        scatterPos: new THREE.Vector3((Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20),
+                        src: blobUrl
+                    };
+                } else {
+                    const idx = photos.length;
+                    const h = 0.2 + (idx * 0.15) % 0.6; 
+                    const r = ((1 - h) * CONFIG.treeRadius) + 2.5; 
+                    const theta = idx * 2.5;
+
+                    x = r * Math.cos(theta);
+                    y = h * CONFIG.treeHeight - CONFIG.treeHeight / 2;
+                    z = r * Math.sin(theta);
+                    
+                    mesh.position.set(x, y, z);
+                    mesh.lookAt(0, y, 0); 
+                    mesh.rotateY(Math.PI);
+
+                    mesh.userData = {
+                        originalPos: new THREE.Vector3(x, y, z),
+                        originalRot: mesh.rotation.clone(),
+                        scatterPos: new THREE.Vector3((Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20),
+                        src: blobUrl
+                    };
+                }
+
+                photoGroup.add(mesh);
+                photos.push(mesh);
+
+                mesh.scale.set(0,0,0);
+                new TWEEN.Tween(mesh.scale)
+                    .to({x:0.5, y:0.5, z:0.5}, 1000)
+                    .easing(TWEEN.Easing.Elastic.Out)
+                    .start();
+            });
+        }
+
+        // --- Settings & User UI ---
+
+        function initSettingsUI() {
+            window.toggleSettings = () => {
+                const p = document.getElementById('settings-panel');
+                p.style.display = (p.style.display === 'block') ? 'none' : 'block';
+            };
+            
+            window.toggleAccordion = (header) => {
+                const content = header.nextElementSibling;
+                content.classList.toggle('active');
+                const icon = header.querySelector('.material-icons');
+                icon.textContent = content.classList.contains('active') ? 'expand_less' : 'expand_more';
+            };
+            
+            // Zoom UI
+            window.zoomCamera = (delta, duration = 500) => {
+                if (!camera) return;
+                const newDist = Math.max(10, Math.min(150, camera.position.length() + delta));
+                const dir = camera.position.clone().normalize();
+                new TWEEN.Tween(camera.position)
+                    .to({ x: dir.x * newDist, y: dir.y * newDist, z: dir.z * newDist }, duration)
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .start();
+            };
+            
+            // Fullscreen UI
+            window.toggleFullscreen = () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            };
+
+
+            const inEmissive = document.getElementById('input-emissive');
+            const inStrength = document.getElementById('input-strength');
+            const inThreshold = document.getElementById('input-threshold');
+            const inExposure = document.getElementById('input-exposure');
+            const inReflection = document.getElementById('input-reflection');
+            
+            const inSpeed = document.getElementById('input-speed');
+            const inSize = document.getElementById('input-size');
+            const inCount = document.getElementById('input-count');
+            
+            const selWeather = document.getElementById('select-weather');
+            const inWeatherAmt = document.getElementById('input-weather-amount');
+            const selMusic = document.getElementById('select-music');
+            
+            // Gesture Checkboxes
+            const inCheckZoom = document.getElementById('check-gesture-zoom');
+            const inCheckScatter = document.getElementById('check-gesture-scatter');
+            const inCheckTree = document.getElementById('check-gesture-tree');
+            const inCheckFocus = document.getElementById('check-gesture-focus');
+            const inCheckAscend = document.getElementById('check-gesture-ascend');
+            const inCheckText = document.getElementById('check-gesture-text');
+            const inTextMsg = document.getElementById('input-text-msg');
+
+            inEmissive.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                document.getElementById('val-emissive').innerText = val.toFixed(1);
+                updateGlow(val);
+            });
+
+            inStrength.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                document.getElementById('val-strength').innerText = val.toFixed(1);
+                CONFIG.bloom.strength = val;
+                if(STATE.mode !== 'TREE' && STATE.mode !== 'FOCUS') composer.passes[1].strength = val;
+            });
+
+            inThreshold.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                document.getElementById('val-threshold').innerText = val.toFixed(2);
+                CONFIG.bloom.threshold = val;
+                composer.passes[1].threshold = val;
+            });
+            
+            inExposure.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                document.getElementById('val-exposure').innerText = val.toFixed(1);
+                renderer.toneMappingExposure = val;
+            });
+
+            inReflection.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                document.getElementById('val-reflection').innerText = val.toFixed(1);
+                updateReflection(val);
+            });
+
+            inSpeed.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                document.getElementById('val-speed').innerText = val;
+                STATE.rotationSpeed = val;
+            });
+
+            inSize.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                document.getElementById('val-size').innerText = val.toFixed(1);
+                CONFIG.particleGlobalScale = val;
+            });
+
+            inCount.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                document.getElementById('val-count').innerText = val + '%';
+                meshGroups.forEach(mesh => {
+                    const max = mesh.userData.initialCount;
+                    mesh.count = Math.floor(max * (val / 100));
+                });
+            });
+
+            selWeather.addEventListener('change', (e) => {
+                CONFIG.weather.type = e.target.value;
+                updateWeatherSettings();
+            });
+
+            inWeatherAmt.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                document.getElementById('val-weather').innerText = val;
+                CONFIG.weather.count = val;
+                updateWeatherSettings();
+            });
+
+            selMusic.addEventListener('change', (e) => {
+                const audio = document.getElementById('bg-music');
+                const src = MUSIC_SOURCES[e.target.value];
+                if(src) {
+                    audio.src = src;
+                    audio.play().catch(e => console.log("Audio play failed (interaction required):", e));
+                } else {
+                    audio.pause();
+                }
+            });
+
+            inTextMsg.addEventListener('input', (e) => {
+                CONFIG.textMessage = e.target.value;
+                regenerateTextTargets();
+            });
+
+            inCheckZoom.addEventListener('change', (e) => { CONFIG.gestures.zoomEnabled = e.target.checked; });
+            inCheckScatter.addEventListener('change', (e) => { CONFIG.gestures.scatter.enabled = e.target.checked; });
+            inCheckTree.addEventListener('change', (e) => { CONFIG.gestures.tree.enabled = e.target.checked; });
+            inCheckFocus.addEventListener('change', (e) => { CONFIG.gestures.focus.enabled = e.target.checked; });
+            inCheckAscend.addEventListener('change', (e) => { CONFIG.gestures.ascend.enabled = e.target.checked; });
+            inCheckText.addEventListener('change', (e) => { CONFIG.gestures.text.enabled = e.target.checked; });
+
+            document.querySelectorAll('.gesture-select').forEach(sel => {
+                sel.addEventListener('change', (e) => {
+                    const type = e.target.id.replace('select-gesture-', '');
+                    CONFIG.gestures[type].gesture = e.target.value;
+                });
+            });
+        }
+        
+        // --- User System (LocalStorage) ---
+        function initUserSystem() {
+            window.toggleUserModal = () => {
+                const m = document.getElementById('user-modal');
+                m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+                if(m.style.display === 'flex') loadSavedScenesList();
+            };
+
+            window.saveScene = () => {
+                const nameInput = document.getElementById('save-name-input');
+                const name = nameInput.value || ("Christmas " + new Date().getFullYear());
+
+                try {
+                    const saveData = {
+                        id: Date.now(),
+                        name: name,
+                        date: new Date().toLocaleDateString(),
+                        config: CONFIG,
+                        photosMeta: photos.map(p => ({
+                            pos: p.userData.originalPos,
+                            rot: p.userData.originalRot
+                        }))
+                    };
+
+                    let saves = JSON.parse(localStorage.getItem('christmas_saves') || '[]');
+                    saves.push(saveData);
+                    localStorage.setItem('christmas_saves', JSON.stringify(saves));
+                    
+                    alert("Scene saved successfully!");
+                    nameInput.value = ""; 
+                    loadSavedScenesList(); 
+                } catch (e) {
+                    console.error("Save failed:", e);
+                    alert("Failed to save scene. Storage may be full.");
+                }
+            };
+
+            window.loadSavedScenesList = () => {
+                const list = document.getElementById('saves-list');
+                list.innerHTML = '';
+                const saves = JSON.parse(localStorage.getItem('christmas_saves') || '[]');
+                
+                if(saves.length === 0) {
+                    list.innerHTML = '<div style="color:#666; padding:20px;">No saved memories yet.</div>';
+                    return;
+                }
+
+                saves.forEach(save => {
+                    const div = document.createElement('div');
+                    div.className = 'save-slot';
+                    div.innerHTML = `
+                        <div class="save-info">
+                            <div class="save-name">${save.name}</div>
+                            <div class="save-date">${save.date}</div>
+                        </div>
+                        <button style="padding:6px 12px; font-size:0.75rem; cursor:pointer; background:transparent; border:1px solid #555; color:#ccc; border-radius:4px;" onclick="loadScene(${save.id})">LOAD</button>
+                    `;
+                    list.appendChild(div);
+                });
+            };
+
+            window.loadScene = (id) => {
+                const saves = JSON.parse(localStorage.getItem('christmas_saves') || '[]');
+                const save = saves.find(s => s.id === id);
+                if(save) {
+                    console.log("Loading scene", save.name);
+                    CONFIG.bloom = save.config.bloom;
+                    CONFIG.weather = save.config.weather;
+                    
+                    updateWeatherSettings();
+                    composer.passes[1].threshold = CONFIG.bloom.threshold;
+                    composer.passes[1].strength = CONFIG.bloom.strength;
+                    
+                    toggleUserModal();
+                }
+            };
+            
+            // Delete Function
+            window.deleteCurrentPhoto = () => {
+                if (STATE.focusedPhoto) {
+                    photoGroup.remove(STATE.focusedPhoto);
+                    if(STATE.focusedPhoto.geometry) STATE.focusedPhoto.geometry.dispose();
+                    if(STATE.focusedPhoto.material) {
+                        if(STATE.focusedPhoto.material.map) STATE.focusedPhoto.material.map.dispose();
+                        STATE.focusedPhoto.material.dispose();
+                    }
+                    photos = photos.filter(p => p !== STATE.focusedPhoto);
+                    setMode('TREE');
+                }
+            };
+            
+            document.getElementById('delete-photo-btn').onclick = window.deleteCurrentPhoto;
+            window.saveScene = saveScene;
+            window.loadScene = loadScene;
+        }
+        
+        function switchPhoto(direction) {
+            if (!STATE.focusedPhoto || photos.length < 2) return;
+            
+            let currentIndex = photos.indexOf(STATE.focusedPhoto);
+            if (currentIndex === -1) return;
+            
+            let nextIndex = currentIndex + direction;
+            if (nextIndex >= photos.length) nextIndex = 0;
+            if (nextIndex < 0) nextIndex = photos.length - 1;
+            
+            const nextPhoto = photos[nextIndex];
+            setMode('FOCUS', nextPhoto);
+        }
+
+        function setMode(newMode, focusTarget = null) {
+            if (!camera || !controls || !scene) return;
+            
+            if (STATE.mode === 'FOCUS' && newMode !== 'FOCUS') {
+                 new TWEEN.Tween(composer.passes[1]).to({ strength: CONFIG.bloom.strength }, 800).start();
+            }
+
+            if (STATE.mode === newMode && newMode !== 'FOCUS') return;
+            STATE.mode = newMode;
+            
+            const exitBtn = document.getElementById('exit-focus-btn');
+            const focusActions = document.getElementById('focus-actions');
+            const uiHeader = document.querySelector('.header');
+            const settingsBtn = document.getElementById('settings-btn');
+            const userProfile = document.getElementById('user-profile');
+            const controlsDiv = document.querySelector('.controls');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+
+            if(newMode === 'FOCUS') {
+                focusActions.classList.add('visible');
+                uiHeader.style.opacity = 0;
+                controlsDiv.style.opacity = 0;
+                settingsBtn.style.opacity = 0;
+                userProfile.style.opacity = 0;
+                fullscreenBtn.style.opacity = 0;
+                STATE.focusedPhoto = focusTarget;
+                STATE.autoRotate = false;
+                new TWEEN.Tween(composer.passes[1]).to({ strength: 0 }, 800).start();
+            } else {
+                focusActions.classList.remove('visible');
+                uiHeader.style.opacity = 1;
+                controlsDiv.style.opacity = 1;
+                settingsBtn.style.opacity = 1;
+                userProfile.style.opacity = 1;
+                fullscreenBtn.style.opacity = 1;
+                STATE.focusedPhoto = null;
+                STATE.autoRotate = true;
+                new TWEEN.Tween(composer.passes[1]).to({ strength: CONFIG.bloom.strength }, 800).start();
+            }
+
+            if (newMode === 'SCATTER') {
+                new TWEEN.Tween(STATE).to({ rotationSpeed: 0.005 }, 1000).start();
+                new TWEEN.Tween(CONFIG.bloom).to({ strength: 2.0, radius: 1.0 }, 1000).start();
+            } else if (newMode === 'TREE') {
+                new TWEEN.Tween(STATE).to({ rotationSpeed: 0.002 }, 1000).start();
+                new TWEEN.Tween(camera.position).to({ x: 0, y: 0, z: CONFIG.camDist }, 1500).easing(TWEEN.Easing.Quadratic.InOut).start();
+                new TWEEN.Tween(controls.target).to({ x: 0, y: 0, z: 0 }, 1500).easing(TWEEN.Easing.Quadratic.InOut).start();
+            } else if (newMode === 'ASCEND') {
+                new TWEEN.Tween(STATE).to({ rotationSpeed: 0.01 }, 1000).start();
+                new TWEEN.Tween(CONFIG.bloom).to({ strength: 2.5, radius: 1.2 }, 1000).start();
+            } else if (newMode === 'TEXT') {
+                new TWEEN.Tween(STATE).to({ rotationSpeed: 0 }, 1000).start();
+                new TWEEN.Tween(camera.position).to({ x: 0, y: 0, z: 50 }, 1500).easing(TWEEN.Easing.Cubic.Out).start();
+            }
+
+            if(newMode === 'FOCUS') {
+                 new TWEEN.Tween(camera.position).to({ x: 0, y: 0, z: CONFIG.camDist }, 1000).easing(TWEEN.Easing.Cubic.Out).start();
+                 new TWEEN.Tween(controls.target).to({ x: 0, y: 0, z: 0 }, 1000).easing(TWEEN.Easing.Cubic.Out).start();
+            }
+        }
+
+        function initInputHandlers() {
+            window.addEventListener('resize', onWindowResize);
+            document.getElementById('btn-mouse').onclick = () => setInputMode('MOUSE');
+            document.getElementById('btn-hand').onclick = () => setInputMode('HAND');
+            document.getElementById('exit-focus-btn').onclick = () => setMode('TREE');
+
+            document.getElementById('file-input').addEventListener('change', (e) => {
+                if(e.target.files) {
+                    Array.from(e.target.files).forEach(file => {
+                        const url = URL.createObjectURL(file);
+                        addPhoto(url);
+                    });
+                }
+            });
+
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            window.addEventListener('mousedown', (event) => {
+                if (STATE.input !== 'MOUSE') return;
+                if(event.target.closest('#settings-panel') || event.target.closest('#settings-btn') || event.target.closest('#user-profile') || event.target.closest('.controls') || event.target.closest('#user-modal') || event.target.closest('#focus-actions') || event.target.closest('#fullscreen-btn')) return;
+
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
+                
+                const intersects = raycaster.intersectObjects(photoGroup.children, true);
+                if (intersects.length > 0) {
+                    let target = intersects[0].object;
+                    while(target.parent !== photoGroup) target = target.parent;
+                    setMode('FOCUS', target);
+                }
+            });
+
+            window.addEventListener('wheel', (event) => {
+                if (STATE.input !== 'MOUSE') return;
+                if (STATE.mode === 'FOCUS') return; 
+                if(event.target.closest('#settings-panel')) return; 
+
+                if (event.deltaY > 50 && STATE.mode === 'TREE') setMode('SCATTER');
+                if (event.deltaY < -50 && STATE.mode === 'SCATTER') setMode('TREE');
+            });
+            
+             window.addEventListener('keydown', (e) => {
+               if(e.key === 'h' || e.key === 'H') {
+                   const ui = document.getElementById('ui-layer');
+                   if (ui.style.opacity === '0') {
+                       ui.style.opacity = '1';
+                       ui.style.pointerEvents = 'none'; 
+                       Array.from(ui.children).forEach(child => child.style.pointerEvents = 'auto');
+                   } else {
+                       ui.style.opacity = '0';
+                       ui.style.pointerEvents = 'none';
+                   }
+               } 
+            });
+        }
+
+        function setInputMode(mode) {
+            STATE.input = mode;
+            document.getElementById('btn-mouse').classList.toggle('active', mode === 'MOUSE');
+            document.getElementById('btn-hand').classList.toggle('active', mode === 'HAND');
+            
+            const camPreview = document.getElementById('webcam-preview');
+            const video = document.getElementById('webcam');
+            
+            if (mode === 'HAND') {
+                camPreview.classList.add('visible');
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                     navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => { video.srcObject = stream; });
+                }
+            } else {
+                camPreview.classList.remove('visible');
+            }
+        }
+
+        async function initMediaPipe() {
+            const vision = await FilesetResolver.forVisionTasks(
+                "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+            );
+            handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                baseOptions: {
+                    modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+                    delegate: "GPU"
+                },
+                runningMode: "VIDEO",
+                numHands: 1
+            });
+        }
+
+        function detectHands() {
+            const video = document.getElementById('webcam');
+            const canvas = document.getElementById('webcam-preview');
+            const ctx = canvas.getContext('2d');
+
+            if (video.videoWidth > 0 && handLandmarker) {
+                if (canvas.width !== video.videoWidth) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                }
+
+                let startTimeMs = performance.now();
+                if (lastVideoTime !== video.currentTime) {
+                    lastVideoTime = video.currentTime;
+                    const result = handLandmarker.detectForVideo(video, startTimeMs);
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    if (result.landmarks.length > 0) {
+                        const landmarks = result.landmarks[0];
+                        ctx.fillStyle = "#FFD700";
+                        for (const p of landmarks) {
+                            ctx.beginPath();
+                            ctx.arc(p.x * canvas.width, p.y * canvas.height, 3, 0, 2 * Math.PI);
+                            ctx.fill();
+                        }
+                        processGestures(landmarks);
+                    }
+                }
+            }
+        }
+
+        function processGestures(landmarks) {
+            const thumbTip = landmarks[4];
+            const indexTip = landmarks[8];
+            const middleTip = landmarks[12];
+            const ringTip = landmarks[16];
+            const pinkyTip = landmarks[20];
+            const wrist = landmarks[0];
+
+            let detectedGesture = 'Unknown';
+
+            const indexOpen = indexTip.y < landmarks[6].y;
+            const middleOpen = middleTip.y < landmarks[10].y;
+            const ringOpen = ringTip.y < landmarks[14].y;
+            const pinkyOpen = pinkyTip.y < landmarks[18].y;
+            const thumbOpen = thumbTip.x > landmarks[2].x; 
+
+            // Calculate distance for OK and Pinch
+            const pinchDist = distance(thumbTip, indexTip);
+
+            // 1. Closed Fist (All closed)
+            if (!indexOpen && !middleOpen && !ringOpen && !pinkyOpen) {
+                detectedGesture = 'Closed_Fist';
+            }
+            // 2. Open Palm (All open)
+            else if (indexOpen && middleOpen && ringOpen && pinkyOpen) {
+                detectedGesture = 'Open_Palm';
+            }
+            // 3. Victory (Index & Middle open)
+            else if (indexOpen && middleOpen && !ringOpen && !pinkyOpen) {
+                detectedGesture = 'Victory';
+            }
+            // 4. Pointing Up (Index only)
+            else if (indexOpen && !middleOpen && !ringOpen && !pinkyOpen) {
+                detectedGesture = 'Pointing_Up';
+            }
+            // 5. Thumbs Up (Thumb up, others closed - simplified check by knuckle relation)
+            // Or just check thumb Y is highest among others if hand is upright? 
+            // Simple approach: Thumb tip Y is above Index MCP Y, and fingers closed
+            else if (thumbTip.y < landmarks[5].y && !indexOpen && !middleOpen && !ringOpen && !pinkyOpen) {
+                detectedGesture = 'Thumb_Up';
+            }
+            // 6. OK Gesture (Index+Thumb touch, others Open)
+            else if (pinchDist < 0.05 && middleOpen && ringOpen && pinkyOpen) {
+                detectedGesture = 'OK';
+            }
+            // 7. Pinch (Index+Thumb touch, others variable/closed?)
+            // We use this as a state if specifically assigned or for Zooming
+            else if (pinchDist < 0.05) {
+                detectedGesture = 'Pinch';
+            }
+
+            // --- Push/Pull Zoom Logic for ALL gestures ---
+            // Hand scale proxy: distance between wrist (0) and middle finger MCP (9)
+            // Use middle MCP as it's stable.
+            const currentHandScale = distance(landmarks[0], landmarks[9]);
+            
+            if (STATE.lastHandScale && CONFIG.gestures.zoomEnabled) {
+                const scaleDelta = currentHandScale - STATE.lastHandScale;
+                // Threshold to avoid jitter, but sensitive enough for interaction
+                if (Math.abs(scaleDelta) > 0.002) { 
+                    // Moving closer (scale up) -> Zoom In (Dist down) -> Delta negative
+                    // Moving away (scale down) -> Zoom Out (Dist up) -> Delta positive
+                    // Hand scale is roughly 0.1 - 0.3. Delta is ~0.01. 
+                    // zoomCamera expects delta ~5. So multiplier ~500.
+                    const zoomSensitivity = 150.0; 
+                    // Use fast duration for responsive hand tracking
+                    window.zoomCamera(-scaleDelta * zoomSensitivity, 50); 
+                }
+            }
+            STATE.lastHandScale = currentHandScale;
+
+            // --- Hand Position Tracking for Swipe ---
+            // Use normalized x (inverted for mirror effect)
+            const currentHandX = -(wrist.x - 0.5); 
+            
+            if (STATE.mode === 'FOCUS') {
+                if (STATE.lastHandX !== null) {
+                    const deltaX = currentHandX - STATE.lastHandX;
+                    const now = Date.now();
+                    
+                    if (now - STATE.swipeCooldown > 1000) { // 1 sec cooldown
+                        if (deltaX > 0.15) { // Swipe Right -> Prev
+                            switchPhoto(-1);
+                            STATE.swipeCooldown = now;
+                        } else if (deltaX < -0.15) { // Swipe Left -> Next
+                            switchPhoto(1);
+                            STATE.swipeCooldown = now;
+                        }
+                    }
+                }
+                STATE.lastHandX = currentHandX;
+            }
+
+            // Update Global Hand Pos for Following 
+            STATE.handPos.x = -(landmarks[8].x - 0.5) * 2; 
+            STATE.handPos.y = -(landmarks[8].y - 0.5) * 2;
+
+            // Helper to check assignment
+            const checkTrigger = (type) => {
+                return (CONFIG.gestures[type].enabled && CONFIG.gestures[type].gesture === detectedGesture);
+            }
+
+            // Mode Switching
+            if (checkTrigger('tree')) setMode('TREE');
+            if (checkTrigger('scatter')) setMode('SCATTER');
+            if (checkTrigger('ascend')) setMode('ASCEND');
+            if (checkTrigger('text')) setMode('TEXT');
+            
+            if (checkTrigger('focus') && STATE.mode !== 'FOCUS') {
+                if (photos.length > 0) {
+                    const randomPhoto = photos[Math.floor(Math.random() * photos.length)];
+                    setMode('FOCUS', randomPhoto);
+                }
+            }
+
+            const handX = landmarks[9].x; 
+            const rotDelta = (handX - 0.5) * 0.08;
+            if (STATE.mode !== 'FOCUS' && STATE.mode !== 'TEXT') {
+                 scene.rotation.y += rotDelta;
+            }
+             // OK Gesture Rotation Logic for TEXT mode
+            if (detectedGesture === 'OK' && STATE.mode === 'TEXT') {
+                const rotDeltaText = (handX - 0.5) * 0.2; 
+                scene.rotation.y += rotDeltaText;
+            }
+        }
+
+        function distance(p1, p2) {
+            return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+        }
+
+        // --- Main Loop ---
+
+        function updateParticles() {
+            const time = clock.getElapsedTime();
+            const lerpFactor = 0.06;
+
+            if (STATE.autoRotate && STATE.mode !== 'FOCUS' && STATE.mode !== 'TEXT') {
+                photoGroup.rotation.y += STATE.rotationSpeed;
+                spriteGroup.rotation.y += STATE.rotationSpeed;
+                scene.rotation.y += STATE.rotationSpeed * 0.3;
+            }
+            
+            if (STATE.mode === 'TREE') {
+                composer.passes[1].strength = CONFIG.bloom.strength + Math.sin(time) * 0.3;
+            }
+
+            // Hand Tracking Target
+            const handTargetX = STATE.handPos.x * 30; 
+            const handTargetY = STATE.handPos.y * 20 + 5;
+
+            // TEXT Mode points
+            const textPoints = STATE.textPoints;
+            const textCount = textPoints ? textPoints.length : 0;
+
+            particleData.forEach((data, i) => {
+                let target;
+                
+                if (STATE.mode === 'SCATTER') {
+                    target = data.scatterPos;
+                }
+                else if (STATE.mode === 'TEXT') {
+                    if (textCount > 0) {
+                        const pointIndex = i % textCount;
+                        if (textPoints[pointIndex]) {
+                             data.textPos.copy(textPoints[pointIndex]);
+                             target = data.textPos;
+                        } else {
+                             target = data.scatterPos;
+                        }
+                    } else {
+                        target = data.scatterPos;
+                    }
+                }
+                else if (STATE.mode === 'ASCEND') {
+                    const ascendSpeed = 0.5 + Math.random() * 0.5;
+                    const spiralRadius = 3 + Math.random() * 5;
+                    
+                    if (data.ascendPos.y > CONFIG.treeHeight + 20) {
+                        data.ascendPos.y = -CONFIG.treeHeight/2;
+                        data.ascendPos.x = handTargetX + (Math.random()-0.5)*10;
+                        data.ascendPos.z = (Math.random()-0.5)*10;
+                    } else {
+                        data.ascendPos.y += ascendSpeed;
+                        const angle = time * 3 + data.index * 0.1;
+                        const centerX = handTargetX;
+                        data.ascendPos.x = centerX + Math.cos(angle) * spiralRadius;
+                        data.ascendPos.z = Math.sin(angle) * spiralRadius;
+                    }
+                    target = data.ascendPos;
+                }
+                else {
+                    target = data.targetPos;
+                }
+
+                // Sync for smooth transition
+                if (STATE.mode !== 'ASCEND') data.ascendPos.copy(data.currentPos);
+                if (STATE.mode !== 'TEXT') data.textPos.copy(data.currentPos);
+
+                data.currentPos.lerp(target, lerpFactor);
+
+                let floatY = Math.sin(time * 2 + data.targetPos.x) * 0.05;
+                if(data.isSprite) floatY *= 2; 
+                
+                if (!data.isSprite) {
+                    dummy.position.copy(data.currentPos);
+                    dummy.position.y += floatY;
+                    
+                    // Rotate based on mode
+                    if(STATE.mode === 'TEXT') {
+                        dummy.lookAt(camera.position); 
+                    } else {
+                        dummy.rotation.x = data.rotationOffset.x + time * 0.5;
+                        dummy.rotation.y = data.rotationOffset.y + time * 0.5;
+                    }
+
+                    let s = data.baseScale;
+                    if(STATE.mode === 'SCATTER') s *= 0.6;
+                    if(STATE.mode === 'TEXT') s *= 0.8; 
+                    if(data.type === 'foliage') s *= (1 + Math.sin(time * 2 + data.index)*0.1);
+                    
+                    s *= CONFIG.particleGlobalScale; 
+
+                    dummy.scale.setScalar(s);
+                    dummy.updateMatrix();
+                    data.mesh.setMatrixAt(data.index, dummy.matrix);
+                } 
+                else {
+                    data.object.position.copy(data.currentPos);
+                    data.object.position.y += floatY;
+                    let s = data.baseScale;
+                    if(STATE.mode === 'SCATTER') s *= 1.2;
+                    s *= CONFIG.particleGlobalScale;
+                    data.object.scale.set(s, s, 1);
+                }
+            });
+
+            meshGroups.forEach(m => m.instanceMatrix.needsUpdate = true);
+        }
+
+        function updatePhotos() {
+             photos.forEach(p => {
+                 let targetScale = 0.5;
+                 
+                 if (STATE.mode === 'SCATTER') targetScale = 1.2; 
+                 else if (STATE.mode === 'FOCUS') {
+                     if (p === STATE.focusedPhoto) {
+                         targetScale = 1.5; 
+                         p.renderOrder = 9999; 
+                     }
+                     else targetScale = 0; 
+                 } 
+                 else if (STATE.mode === 'TEXT') {
+                     targetScale = 0; 
+                 }
+                 else {
+                     targetScale = 0.5;
+                     p.renderOrder = 0;
+                 }
+
+                 p.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+
+                 if (STATE.mode === 'FOCUS' && p === STATE.focusedPhoto) {
+                     const floatDist = 8;
+                     const dir = new THREE.Vector3();
+                     camera.getWorldDirection(dir);
+                     const targetPos = camera.position.clone().add(dir.multiplyScalar(floatDist));
+                     
+                     const groupInv = photoGroup.matrixWorld.clone().invert();
+                     const localTarget = targetPos.clone().applyMatrix4(groupInv);
+                     
+                     p.position.lerp(localTarget, 0.1);
+                     
+                     const parentQuat = new THREE.Quaternion();
+                     photoGroup.getWorldQuaternion(parentQuat);
+                     const camQuat = camera.quaternion.clone();
+                     const targetLocalQuat = camQuat.clone().premultiply(parentQuat.invert());
+                     
+                     p.quaternion.slerp(targetLocalQuat, 0.1);
+                     
+                 } else if (STATE.mode === 'SCATTER') {
+                     p.position.lerp(p.userData.scatterPos, 0.03);
+                     p.rotation.x += 0.005;
+                     p.rotation.z += 0.005;
+                 } else if (STATE.mode === 'ASCEND') {
+                     p.position.y += 0.1;
+                     p.rotation.y += 0.05;
+                     if(p.position.y > 40) p.position.y = -20;
+                 } else {
+                     p.position.lerp(p.userData.originalPos, 0.06);
+                     p.rotation.x = THREE.MathUtils.lerp(p.rotation.x, p.userData.originalRot.x, 0.06);
+                     p.rotation.y = THREE.MathUtils.lerp(p.rotation.y, p.userData.originalRot.y, 0.06);
+                     p.rotation.z = THREE.MathUtils.lerp(p.rotation.z, p.userData.originalRot.z, 0.06);
+                 }
+             });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            TWEEN.update();
+            if(controls) controls.update(); 
+
+            updateParticles();
+            updatePhotos();
+            updateWeatherAnimation();
+
+            if (STATE.input === 'HAND') {
+                detectHands();
+            }
+
+            composer.render();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.onload = init;
+
+    </script>
+</body>
+</html>
